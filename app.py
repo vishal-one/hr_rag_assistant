@@ -8,6 +8,11 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
+# --- ADD THESE 3 LINES TO FIX THE AUTH ERROR ---
+if "GROQ_API_KEY" in st.secrets:
+    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+# -----------------------------------------------
+
 st.set_page_config(page_title="Zyro HR Help Desk", layout="centered")
 st.title("🏢 Zyro Dynamics HR Help Desk")
 
