@@ -40,8 +40,9 @@ def init_rag():
     retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 8})
     
     # 4. Out-of-Scope Prompt
+  # 4. Out-of-Scope Prompt
     OOS_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", "You are a strict classifier. Your ONLY approved company is 'Zyro Dynamics'. If the user's question mentions, implies, or asks about ANY other company name or organization, you must respond with EXACTLY the word NO. If the question is not about HR, respond with NO. Otherwise, respond with YES."),
+        ("system", "You are a strict classifier. Respond with ONLY the word YES or NO. Do not explain yourself.\n\nIf the user's question mentions ANY company other than 'Zyro Dynamics', respond NO.\nIf the question is completely unrelated to HR or company policies, respond NO.\nOtherwise, respond YES."),
         ("human", "{question}")
     ])
     
