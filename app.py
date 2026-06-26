@@ -39,10 +39,13 @@ def init_rag():
     ])
     
     # 5. RAG Prompt
+
+    # 5. RAG Prompt
     RAG_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", "Answer ONLY from the context provided. Provide a clear, helpful answer based on whatever relevant details exist in the context. Even if it partially answers, share the available details.\n\nContext:\n{context}"),
+        ("system", "You are a strict HR assistant for Zyro Dynamics. Answer the question using ONLY the provided context.\\n\\nCRITICAL RULE: If the exact answer is not explicitly stated in the context, do NOT use outside knowledge and do NOT explain yourself. You MUST respond with exactly this phrase and nothing else: I can only answer HR-related questions from Zyro Dynamics policy documents.\\n\\nContext:\\n{context}"),
         ("human", "{question}")
     ])
+  
     
     return llm, retriever, OOS_PROMPT, RAG_PROMPT
 
