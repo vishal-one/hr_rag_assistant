@@ -1,3 +1,4 @@
+app_code = '''
 import os
 import streamlit as st
 from langchain_groq import ChatGroq
@@ -8,7 +9,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-# --- Robust Environment Key Loading ---
 if "GROQ_API_KEY" in st.secrets:
     os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 else:
@@ -18,20 +18,13 @@ else:
 st.set_page_config(page_title="Zyro HR Help Desk", layout="centered")
 st.title("🏢 Zyro Dynamics HR Help Desk")
 
-# The exact Kaggle refusal string required for a perfect score
 REFUSAL_MESSAGE = "I can only answer HR-related questions from Zyro Dynamics policy documents."
 
 @st.cache_resource
 def init_rag():
-    # 1. Initialize LLM (Switched to 8B for speed and rate-limit safety)
     llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.0)
-    
-    # ... rest of your code stays exactly the same
-    
-    # 2. Initialize Embeddings
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     
-    # 3. Load and build FAISS vector store on startup
     loader = PyPDFDirectoryLoader("zyro-dynamics-hr-corpus")
     documents = loader.load()
     
@@ -39,55 +32,47 @@ def init_rag():
     chunks = splitter.split_documents(documents)
     
     vectorstore = FAISS.from_documents(chunks, embeddings)
-    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 8})
-
-    # 4. Out-of-Scope Prompt
+    retriever = vectorstore.as_retriever(
+        search_type="mmr", 
+        search_kwargs={"k": 6, "fetch_k": 20, "lambda_mult": 0.7}
+    )
+    
     OOS_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", """You are a highly strict binary classifier. You must evaluate the user's question and output EXACTLY the word NO if ANY of these conditions are met:
-1. The question mentions, implies, or asks about ANY company, brand, or organization other than "Zyro Dynamics".
-2. The question is entirely unrelated to HR or workplace policies.
-
-If and ONLY if the question is a valid HR question specifically about Zyro Dynamics (or a general HR question with no other company mentioned), output EXACTLY the word YES. Do not include any other text."""),
+        ("system", "You are a strict intent classifier. Respond with exactly one word: YES or NO.\\n\\nIf the question is about company HR policies, travel rules, leaves, benefits, onboarding, code of conduct, or IT compliance, respond YES. If it is an unrelated general question or task request, respond NO."),
         ("human", "{question}")
     ])
     
-    # 5. RAG Prompt
     RAG_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", """You are a strict HR assistant for Zyro Dynamics. Answer the question using ONLY the provided context.
+        ("system", """You are an expert HR helpdesk assistant. Answer the employee's question accurately using ONLY the provided policy context.
 
-CRITICAL RULES:
-1. If the user's question asks about or mentions ANY company other than Zyro Dynamics, YOU MUST REFUSE.
-2. If the exact answer is not explicitly stated in the context, YOU MUST REFUSE.
-3. NEVER provide alternative information, corrections, or explanations. 
-
-If you must refuse based on the rules above, you MUST output exactly this phrase and absolutely nothing else:
+STRICT GROUNDING RULES:
+1. Rely ONLY on the clear facts mentioned directly in the context. Do not assume or extrapolate.
+2. If the context does not contain the explicit answer to the question, respond with exactly this phrase and nothing else:
 I can only answer HR-related questions from Zyro Dynamics policy documents.
+3. Answer the question directly and factually. Include specific numbers, dates, timelines, and limits exactly as stated.
+4. Do not mention any discrepancy in company names. Just answer the question.
 
 Context:
 {context}"""),
         ("human", "{question}")
     ])
-  
     
     return llm, retriever, OOS_PROMPT, RAG_PROMPT
 
-# Initialize the system
 with st.spinner("Starting up HR systems and loading policies..."):
     try:
         llm, retriever, OOS_PROMPT, RAG_PROMPT = init_rag()
     except Exception as e:
-        st.error(f"Error loading system: {e}. Ensure your 'zyro-dynamics-hr-corpus' folder is in the repo.")
+        st.error(f"Error loading system: {e}.")
         st.stop()
 
-# Chat UI State
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [{"role": "assistant", "content": "Hello! I am the HR Assistant. How can I help you with our policies today?"}]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Handle Chat Input
 if prompt := st.chat_input("Ask about leaves, payroll, or benefits..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -95,19 +80,25 @@ if prompt := st.chat_input("Ask about leaves, payroll, or benefits..."):
         
     with st.chat_message("assistant"):
         with st.spinner("Searching policies..."):
-            # Step 1: Guardrail Check
             classification = (OOS_PROMPT | llm | StrOutputParser()).invoke({"question": prompt}).strip().upper()
             
-            # Step 2: Bulletproof Check logic
             if "NO" in classification or "YES" not in classification:
                 response = REFUSAL_MESSAGE
+                st.markdown(response)
             else:
-                # Step 3: RAG Pipeline Execution
                 docs = retriever.invoke(prompt)
-                context = "\n\n".join(d.page_content for d in docs)
+                context = "\\n\\n".join(d.page_content for d in docs)
                 
                 chain = RAG_PROMPT | llm | StrOutputParser()
                 response = chain.invoke({"context": context, "question": prompt})
-            
-            st.markdown(response)
+                st.markdown(response)
+                
+                with st.expander("View Retrieved Context"):
+                    st.text(context)
+                    
             st.session_state.messages.append({"role": "assistant", "content": response})
+'''
+
+with open("app.py", "w") as f:
+    f.write(app_code.strip())
+print("app.py updated successfully.")
