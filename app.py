@@ -38,11 +38,14 @@ def init_rag():
     
     vectorstore = FAISS.from_documents(chunks, embeddings)
     retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 8})
-    
+
     # 4. Out-of-Scope Prompt
-  # 4. Out-of-Scope Prompt
     OOS_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", "You are a strict classifier. Respond with ONLY the word YES or NO. Do not explain yourself.\n\nIf the user's question mentions ANY company other than 'Zyro Dynamics', respond NO.\nIf the question is completely unrelated to HR or company policies, respond NO.\nOtherwise, respond YES."),
+        ("system", """You are a highly strict binary classifier. You must evaluate the user's question and output EXACTLY the word NO if ANY of these conditions are met:
+1. The question mentions, implies, or asks about ANY company, brand, or organization other than "Zyro Dynamics".
+2. The question is entirely unrelated to HR or workplace policies.
+
+If and ONLY if the question is a valid HR question specifically about Zyro Dynamics (or a general HR question with no other company mentioned), output EXACTLY the word YES. Do not include any other text."""),
         ("human", "{question}")
     ])
     
@@ -50,12 +53,19 @@ def init_rag():
     RAG_PROMPT = ChatPromptTemplate.from_messages([
         ("system", """You are a strict HR assistant for Zyro Dynamics. Answer the question using ONLY the provided context.
 
-CRITICAL RULE: If the user asks about policies for any company other than Zyro Dynamics, OR if the exact answer is not explicitly stated in the context, do NOT explain yourself. You MUST respond with exactly this phrase and nothing else: I can only answer HR-related questions from Zyro Dynamics policy documents.
+CRITICAL RULES:
+1. If the user's question asks about or mentions ANY company other than Zyro Dynamics, YOU MUST REFUSE.
+2. If the exact answer is not explicitly stated in the context, YOU MUST REFUSE.
+3. NEVER provide alternative information, corrections, or explanations. 
+
+If you must refuse based on the rules above, you MUST output exactly this phrase and absolutely nothing else:
+I can only answer HR-related questions from Zyro Dynamics policy documents.
 
 Context:
 {context}"""),
         ("human", "{question}")
     ])
+  
     
     return llm, retriever, OOS_PROMPT, RAG_PROMPT
 
