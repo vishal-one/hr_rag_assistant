@@ -23,8 +23,10 @@ REFUSAL_MESSAGE = "I can only answer HR-related questions from Zyro Dynamics pol
 
 @st.cache_resource
 def init_rag():
-    # 1. Initialize LLM
-    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.0)
+    # 1. Initialize LLM (Switched to 8B for speed and rate-limit safety)
+    llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.0)
+    
+    # ... rest of your code stays exactly the same
     
     # 2. Initialize Embeddings
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
