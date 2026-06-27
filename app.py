@@ -30,17 +30,17 @@ def init_rag():
     splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=250)
     chunks = splitter.split_documents(documents)
     
- vectorstore = FAISS.from_documents(chunks, embeddings)
- retriever = vectorstore.as_retriever(
+    vectorstore = FAISS.from_documents(chunks, embeddings)
+    retriever = vectorstore.as_retriever(
         search_type="mmr", 
         search_kwargs={
-            "k": 8,             # Reverted to 8 to maintain maximum context!
-            "fetch_k": 30,      # Increased so MMR has a larger pool to filter from
+            "k": 8,             
+            "fetch_k": 30,      
             "lambda_mult": 0.7
         }
     )
     
-   OOS_PROMPT = ChatPromptTemplate.from_messages([
+    OOS_PROMPT = ChatPromptTemplate.from_messages([
         ("system", """You are a strict intent classifier for the Zyro Dynamics HR Help Desk. Respond with exactly one word: YES or NO.
 
 1. If the question explicitly mentions ANY specific company name other than "Zyro Dynamics", respond NO.
@@ -53,27 +53,19 @@ def init_rag():
         ("system", """You are the official HR helpdesk assistant for Zyro Dynamics. Answer the question using ONLY the provided HR policy context.
 
 STRICT RULES:
-1. If the user's question asks about ANY specific company name other than "Zyro Dynamics", output EXACTLY this string and nothing else:
+1. Base your answer STRICTLY on the provided context.
+2. EXTERNAL COMPANY RULE: If the user's question asks about ANY specific company name other than "Zyro Dynamics", you MUST output EXACTLY this string and absolutely nothing else:
 I can only answer HR-related questions from Zyro Dynamics policy documents.
-2. If the context only contains information for a different company name, do not use it. Output the exact refusal string above.
-3. Base your answer STRICTLY on the facts in the context. Do not use phrases like "Based on the context".
+3. CONTEXT POISONING RULE: If you find an answer in the context, but the text explicitly attributes that policy, email, or document to a company name other than "Zyro Dynamics", DO NOT use it. You MUST output EXACTLY this string:
+I can only answer HR-related questions from Zyro Dynamics policy documents.
+4. MISSING CONTEXT RULE: If the valid context does not contain the answer, you MUST output EXACTLY this string:
+I can only answer HR-related questions from Zyro Dynamics policy documents.
+5. Be direct and factual. Do not use filler introductory phrases like "Based on the context provided". Just give the answer.
 
 Context:
 ---
 {context}
 ---"""),
-        ("human", "{question}")
-    ])
-
-STRICT GROUNDING RULES:
-1. Rely ONLY on the clear facts mentioned directly in the context. Do not assume or extrapolate.
-2. If the context does not contain the explicit answer to the question, respond with exactly this phrase and nothing else:
-I can only answer HR-related questions from Zyro Dynamics policy documents.
-3. Answer the question directly and factually. Include specific numbers, dates, timelines, and limits exactly as stated.
-4. Do not mention any discrepancy in company names. Just answer the question.
-
-Context:
-{context}"""),
         ("human", "{question}")
     ])
     
@@ -107,7 +99,7 @@ if prompt := st.chat_input("Ask about leaves, payroll, or benefits..."):
                 st.markdown(response)
             else:
                 docs = retriever.invoke(prompt)
-                context = "\\n\\n".join(d.page_content for d in docs)
+                context = "\n\n".join(d.page_content for d in docs)
                 
                 chain = RAG_PROMPT | llm | StrOutputParser()
                 response = chain.invoke({"context": context, "question": prompt})
