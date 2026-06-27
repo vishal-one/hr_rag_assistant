@@ -1,4 +1,3 @@
-app_code = '''
 import os
 import streamlit as st
 from langchain_groq import ChatGroq
@@ -97,8 +96,4 @@ if prompt := st.chat_input("Ask about leaves, payroll, or benefits..."):
                     st.text(context)
                     
             st.session_state.messages.append({"role": "assistant", "content": response})
-'''
 
-with open("app.py", "w") as f:
-    f.write(app_code.strip())
-print("app.py updated successfully.")
