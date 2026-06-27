@@ -30,19 +30,40 @@ def init_rag():
     splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=250)
     chunks = splitter.split_documents(documents)
     
-    vectorstore = FAISS.from_documents(chunks, embeddings)
+ vectorstore = FAISS.from_documents(chunks, embeddings)
     retriever = vectorstore.as_retriever(
         search_type="mmr", 
-        search_kwargs={"k": 6, "fetch_k": 20, "lambda_mult": 0.7}
+        search_kwargs={
+            "k": 8,             # Reverted to 8 to maintain maximum context!
+            "fetch_k": 30,      # Increased so MMR has a larger pool to filter from
+            "lambda_mult": 0.7
+        }
     )
     
-    OOS_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", "You are a strict intent classifier. Respond with exactly one word: YES or NO.\\n\\nIf the question is about company HR policies, travel rules, leaves, benefits, onboarding, code of conduct, or IT compliance, respond YES. If it is an unrelated general question or task request, respond NO."),
+   OOS_PROMPT = ChatPromptTemplate.from_messages([
+        ("system", """You are a strict intent classifier for the Zyro Dynamics HR Help Desk. Respond with exactly one word: YES or NO.
+
+1. If the question explicitly mentions ANY specific company name other than "Zyro Dynamics", respond NO.
+2. If the question asks about HR policies generically or mentions "Zyro Dynamics", respond YES.
+3. If it is an unrelated general knowledge or non-HR task, respond NO."""),
         ("human", "{question}")
     ])
     
     RAG_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", """You are an expert HR helpdesk assistant. Answer the employee's question accurately using ONLY the provided policy context.
+        ("system", """You are the official HR helpdesk assistant for Zyro Dynamics. Answer the question using ONLY the provided HR policy context.
+
+STRICT RULES:
+1. If the user's question asks about ANY specific company name other than "Zyro Dynamics", output EXACTLY this string and nothing else:
+I can only answer HR-related questions from Zyro Dynamics policy documents.
+2. If the context only contains information for a different company name, do not use it. Output the exact refusal string above.
+3. Base your answer STRICTLY on the facts in the context. Do not use phrases like "Based on the context".
+
+Context:
+---
+{context}
+---"""),
+        ("human", "{question}")
+    ])
 
 STRICT GROUNDING RULES:
 1. Rely ONLY on the clear facts mentioned directly in the context. Do not assume or extrapolate.
@@ -96,4 +117,3 @@ if prompt := st.chat_input("Ask about leaves, payroll, or benefits..."):
                     st.text(context)
                     
             st.session_state.messages.append({"role": "assistant", "content": response})
-
