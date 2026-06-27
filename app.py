@@ -31,7 +31,7 @@ def init_rag():
     chunks = splitter.split_documents(documents)
     
  vectorstore = FAISS.from_documents(chunks, embeddings)
-    retriever = vectorstore.as_retriever(
+ retriever = vectorstore.as_retriever(
         search_type="mmr", 
         search_kwargs={
             "k": 8,             # Reverted to 8 to maintain maximum context!
