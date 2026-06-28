@@ -59,6 +59,8 @@ GROQ_API_KEY = "your_groq_api_key_here"
 Bash
 streamlit run app.py
 🧠 The "Data Poisoning" Challenge
-A major hurdle in this project was intentional dataset obfuscation. The source PDFs randomly swapped the company name between "Zyro Dynamics" and "Acrux Dynamics." Standard RAG architectures either hallucinated policies or refused valid questions due to entity mismatches.
+A major hurdle in this project was intentional dataset obfuscation. The source PDFs randomly swapped the company name between "Zyro Dynamics" and "Acrux Dynamics." 
+Standard RAG architectures either hallucinated policies or refused valid questions due to entity mismatches.
 
-The Solution: Instead of hardcoding keyword blocks, I engineered an overarching Intent Classifier prompt that conceptually merged the two entities, allowing the downstream RAG Generator to safely pull cross-company context without triggering out-of-scope guardrails
+The Solution: Instead of hardcoding keyword blocks.
+I engineered an overarching Intent Classifier prompt that conceptually merged the two entities, allowing the downstream RAG Generator to safely pull cross-company context without triggering out-of-scope guardrails
