@@ -1,35 +1,47 @@
-# 🏢 Zyro Dynamics HR Help Desk (RAG Pipeline)
+# 🏢 Zyro Dynamics HR Help Desk — Kaggle RAG Challenge
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![LangChain](https://img.shields.io/badge/LangChain-Enabled-green)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B)
 ![LLM](https://img.shields.io/badge/LLM-Llama_3.1-orange)
 
-An intelligent, production-ready Retrieval-Augmented Generation (RAG) chatbot built to automate complex HR policy inquiries for Zyro Dynamics. This project was developed as part of a competitive Kaggle challenge, achieving top-tier accuracy against a strict automated semantic similarity grader.
+An intelligent, production-ready Retrieval-Augmented Generation (RAG) chatbot built to automate complex HR policy inquiries for Zyro Dynamics. This repository contains my solution for the **Kaggle HR RAG Hackathon**, where this pipeline secured a top-tier **89.11% accuracy score** on the competitive leaderboard.
+
+## 🏆 Kaggle Competition Context
+
+The hackathon challenged participants to build a highly robust enterprise virtual assistant capable of querying 11 complex internal corporate policy PDFs. Submissions were evaluated by an automated backend grading script using strict **semantic similarity metrics** against a hidden ground-truth answer key. 
+
+To prevent basic keyword-matching shortcuts, the evaluation set contained adversarial "traps," out-of-scope general knowledge queries, and intentional data contradictions designed to break fragile pipelines.
 
 ## 🚀 Overview
 
-This project implements a highly optimized RAG pipeline that reads, chunks, and retrieves information from 11 internal HR policy PDFs to answer employee questions. 
-
-Unlike basic RAG setups, this pipeline is engineered to survive adversarial data traps (like intentionally swapped company names) and strict phrasing evaluations. It features a dual-layer prompt architecture, advanced vector retrieval, and a fully interactive UI.
+This project implements an end-to-end optimized RAG pipeline capable of handling adversarial data setups while keeping generation tightly grounded. Unlike standard "plug-and-play" RAG tutorials, this architecture features a dual-layer prompt defense framework, diverse vector space retrieval, and an interactive frontend wrapper.
 
 ## ✨ Key Features
 
-* **Adversarial Data Defense:** Implements a strict "Intent Classifier" to dynamically bypass data poisoning (interchangeable use of "Zyro Dynamics" and "Acrux Dynamics") while strictly blocking out-of-scope queries about external competitors.
-* **Semantic-Optimized Generation:** Uses tailored conversational framing and "soft refusal" fallback logic to maximize semantic similarity scores against hidden ground truths.
-* **Maximal Marginal Relevance (MMR) Retrieval:** Replaces standard cosine similarity with MMR (`k=8`, `fetch_k=30`) to guarantee a diverse, multi-document context window for highly complex questions.
-* **Live Citation UI:** Dynamically extracts document metadata to render real-time source file citations in the Streamlit frontend.
-* **Full Observability:** Integrated with LangSmith for token tracking, latency monitoring, and LLM output debugging.
+* **Adversarial Data Defense:** Implements a strict "Intent Classifier" guardrail to dynamically bypass data poisoning (interchangeable use of "Zyro Dynamics" and "Acrux Dynamics") while cleanly blocking out-of-scope queries about external tech competitors.
+* **Semantic-Optimized Phrasing:** Utilizes custom-tailored corporate framing guidelines and precise "soft refusal" fallback logic to match the exact tone and structure expected by the Kaggle auto-grader.
+* **Maximal Marginal Relevance (MMR) Retrieval:** Replaces standard cosine similarity with MMR (`k=8`, `fetch_k=30`) to balance query relevance with chunk diversity, preventing the LLM from missing crucial context scattered across different policy updates.
+* **Live Citation UI:** Dynamically parses chunk metadata to render real-time source file citations directly in the Streamlit frontend.
+* **Production-Grade Observability:** Fully integrated with LangSmith for deep execution tracing, latency analysis, and token tracking.
 
 ## 🛠️ Tech Stack
 
-* **Orchestration:** [LangChain](https://python.langchain.com/)
-* **LLM:** [Groq](https://groq.com/) (Llama-3.1-8b-instant) for ultra-low latency inference
+* **Orchestration:** [LangChain](https://python.langchain.com/) (LCEL)
+* **LLM:** [Groq](https://groq.com/) (Llama-3.1-8b-instant) for lightning-fast inference
 * **Embeddings:** HuggingFace (`sentence-transformers/all-MiniLM-L6-v2`)
 * **Vector Database:** FAISS (Facebook AI Similarity Search)
 * **Frontend:** [Streamlit](https://streamlit.io/)
-* **Tracing/Monitoring:** LangSmith
+* **Monitoring:** LangSmith
 
+## 📂 Repository Structure
+
+```text
+├── zyro-dynamics-hr-corpus/    # Directory containing the 11 HR Policy PDFs
+├── app.py                      # Main Streamlit application and RAG backend
+├── __notebook_source__.ipynb   # Original Kaggle notebook used for submission generation
+├── requirements.txt            # Project dependencies
+└── README.md
 ## 📂 Repository Structure
 
 ```text
