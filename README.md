@@ -5,7 +5,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B)
 ![LLM](https://img.shields.io/badge/LLM-Llama_3.1-orange)
 
-An intelligent, production-ready Retrieval-Augmented Generation (RAG) chatbot built to automate complex HR policy inquiries for Zyro Dynamics. This repository contains my solution for the **Kaggle HR RAG Hackathon**, where this pipeline secured a top-tier **89.11% accuracy score** on the competitive leaderboard.
+An intelligent, production-ready Retrieval-Augmented Generation (RAG) chatbot built to automate complex HR policy inquiries for Zyro Dynamics. This repository contains my solution for the **NIAT Masterclass - RAG Challenge**, where this pipeline secured a top-tier **89.11% accuracy score** on the competitive leaderboard.
 
 ## 🏆 Kaggle Competition Context
 
