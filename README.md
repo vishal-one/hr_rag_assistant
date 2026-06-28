@@ -39,14 +39,6 @@ This project implements an end-to-end optimized RAG pipeline capable of handling
 ```text
 ├── zyro-dynamics-hr-corpus/    # Directory containing the 11 HR Policy PDFs
 ├── app.py                      # Main Streamlit application and RAG backend
-├── __notebook_source__.ipynb   # Original Kaggle notebook used for submission generation
-├── requirements.txt            # Project dependencies
-└── README.md
-## 📂 Repository Structure
-
-```text
-├── zyro-dynamics-hr-corpus/    # Directory containing the 11 HR Policy PDFs
-├── app.py                      # Main Streamlit application and RAG backend
 ├── __notebook_source__.ipynb   # Original Kaggle notebook for pipeline testing and submission generation
 ├── requirements.txt            # Project dependencies
 └── README.md
